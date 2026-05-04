@@ -13,26 +13,29 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public class Rx implements Runnable{
-    private final BufferedReader reader;
+    private final BufferedReader leitor;
 
     public Rx(InputStream in) {
-        this.reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+//        baseado em json, le linha a linha -> converte de bytes para txt
+        this.leitor = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
     }
 
     @Override
     public void run() {
         try {
             String line;
-            while ((line = reader.readLine()) != null){
+            while ((line = leitor.readLine()) != null){
+//                JSON -> Obj - Message
                 Message msg = new Gson().fromJson(line, Message.class);
+//                System.out.println("Tudo do msg: "+msg);
 
                 switch (msg.type.toUpperCase()) {
                     case "MESSAGE" -> {
-                        System.out.println("\n-------------------Message Received!-------------------");
-                        System.out.println("Topic:      "+msg.topic);
-                        System.out.println("Date:       "+msg.date);
-                        System.out.println("Time:       "+msg.time);
-                        System.out.println("Message:    "+msg.payload);
+                        System.out.println("\n-------------------Mensagem Recebida!-------------------");
+                        System.out.println("Topico:      "+msg.topic);
+                        System.out.println("Data:       "+msg.date);
+                        System.out.println("Horario:       "+msg.time);
+                        System.out.println("Mensagem:    "+msg.payload);
                         System.out.println("-------------------------------------------------------");
                     }
                     case "TOPICS_LIST" -> {
@@ -42,18 +45,18 @@ public class Rx implements Runnable{
                         Client.latestTopics = topics;
                         Client.topicsUpdated = true;
 
-                        System.out.print("[Topics available: " + topics.toString() + "]\n");
-                        System.out.println("-1. 'Create a new topic'");
+                        System.out.print("[Topicos disponiveis: " + topics.toString() + "]\n");
+                        System.out.println("-1. 'Crie um novo tópico'");
                         for (int i = 0; i < topics.size(); i++) {
                             System.out.println(" "+i + ". " + topics.get(i));
                         }
                         System.out.print("\n>");
                     }
-                    default -> System.out.println("Unknown type: " + msg.type);
+                    default -> System.out.println("Não reconhecido: " + msg.type);
                 }
             }
         } catch (IOException e) {
-            System.out.println("Disconnected from the broker (Rx): " + e.getMessage());
+            System.out.println("Desconectado do broker (Rx): " + e.getMessage());
         }
     }
 }

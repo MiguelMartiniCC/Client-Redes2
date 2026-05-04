@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Tx implements Runnable{
+//    envia p/ socket
     private final PrintWriter writer;
     private final Scanner scanner;
 
@@ -32,19 +33,19 @@ public class Tx implements Runnable{
                 case "1" -> handleSubscribe();
                 case "2" -> handlePublish();
                 case "3" -> {
-                    System.out.println("Goodbye!");
+                    System.out.println("Saindo...!");
                     writer.close();
                     return;
                 }
-                default -> System.out.println("Invalid command. Try again.");
+                default -> System.out.println("Comando invaido. Tente novamente.");
             }
         }
     }
     private void showMenu() {
-        System.out.println("\n==========================MENU=========================");
-        System.out.println("1. SUBSCRIBE - Subscribe to a topic");
-        System.out.println("2. PUBLISH   - Send a message to a topic");
-        System.out.println("3. EXIT      - Disconnect");
+        System.out.println("\n=======================================================");
+        System.out.println("1. SUBSCRIBE - Inscreva-se em um topico");
+        System.out.println("2. PUBLISH   - Envie uma mensagem à um topico");
+        System.out.println("3. EXIT      - Desconectar");
         System.out.println("=======================================================");
         System.out.print("> ");
     }
@@ -66,8 +67,8 @@ public class Tx implements Runnable{
         String topic = chooseTopic("LIST_MY_TOPICS", topics, "PUBLISH");
         if (topic == null) return;
 
-        System.out.println("[Topic]: " + topic);
-        System.out.print("Enter message to publish: ");
+        System.out.println("[Topico]: " + topic);
+        System.out.print("Digite uma mensagem: ");
         String payload = scanner.nextLine().trim();
 
         send(createMessage("PUBLISH", topic, payload));
@@ -81,7 +82,7 @@ public class Tx implements Runnable{
         String topic = "";
 
         if (topics.isEmpty()) {
-            System.out.print("No topics available yet. Create a new one to "+action+": ");
+            System.out.print("Nenhum topico disponivel. Crie um novo "+action+": ");
             topic = scanner.nextLine().trim();
 
             if (action.equalsIgnoreCase("PUBLISH")) {
@@ -89,7 +90,7 @@ public class Tx implements Runnable{
             }
 
             if (topic.isEmpty()) {
-                System.out.println("Topic cannot be empty. Try again.");
+                System.out.println("Topico nao pode ser vazio");
                 return null;
             }
             Client.latestTopics.add(topic);
@@ -98,16 +99,16 @@ public class Tx implements Runnable{
     }
 
     private String chooseTopic(String type, List<String> topics, String action) {
-        requestTopics(type);
-        System.out.print("Select the topic number to "+action+" or type -1 to create a new one: ");
+//        requestTopics(type);
+        System.out.print("Selecione um topico para "+action+" ou digite -1 para criar um novo: ");
         int index = scanner.nextInt();
         scanner.nextLine();
 
         if (index == -1) {
-            System.out.print("Create a new topic: ");
+            System.out.print("Crie um novo topico: ");
             String topic = scanner.nextLine().trim();
             if (topic.isEmpty()) {
-                System.out.println("Topic cannot be empty. Try again.");
+                System.out.println("Topico nao pode ser vazio.");
                 return null;
             }
 
@@ -122,7 +123,7 @@ public class Tx implements Runnable{
             return topics.get(index);
         }
 
-        System.out.println("Invalid number. Try again.");
+        System.out.println("Numero invaido");
         return null;
     }
 
@@ -139,7 +140,7 @@ public class Tx implements Runnable{
     private void send(Message msg) {
         String json = new Gson().toJson(msg);
         writer.println(json);
-        System.out.println("Message sent: " + json);
+//        System.out.println("Message sent: " + json);
     }
 
     private void requestTopics(String type) {
