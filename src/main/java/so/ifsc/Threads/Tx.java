@@ -37,7 +37,7 @@ public class Tx implements Runnable{
                     writer.close();
                     return;
                 }
-                default -> System.out.println("Comando invaido. Tente novamente.");
+                default -> System.out.println("Comando invalido. Tente novamente.");
             }
         }
     }
