@@ -17,10 +17,12 @@ public class Tx implements Runnable{
 //    envia p/ socket
     private final PrintWriter writer;
     private final Scanner scanner;
+    private final String clientId;
 
-    public Tx(OutputStream out) {
+    public Tx(OutputStream out, String clientId) {
         this.writer = new PrintWriter(out, true);
         this.scanner = new Scanner(System.in);
+        this.clientId = clientId;
     }
 
     @Override
@@ -33,7 +35,10 @@ public class Tx implements Runnable{
                 case "1" -> handleSubscribe();
                 case "2" -> handlePublish();
                 case "3" -> {
-                    System.out.println("Saindo...!");
+                    handleUnsubscribe();
+                }
+                case "4" -> {
+                    send(createMessage("DISCONNECT", null, null));
                     writer.close();
                     return;
                 }
@@ -45,7 +50,8 @@ public class Tx implements Runnable{
         System.out.println("\n=======================================================");
         System.out.println("1. SUBSCRIBE - Inscreva-se em um topico");
         System.out.println("2. PUBLISH   - Envie uma mensagem à um topico");
-        System.out.println("3. EXIT      - Desconectar");
+        System.out.println("3. UNSUBSCRIBE      - Sair de um tópico");
+        System.out.println("4. DISCONNECT      - Sair da aplicação");
         System.out.println("=======================================================");
         System.out.print("> ");
     }
@@ -60,18 +66,38 @@ public class Tx implements Runnable{
         send(createMessage("SUBSCRIBE", topic, null));
     }
 
+    private void handleUnsubscribe(){
+        List<String> topics = requestAndSelectTopic("LIST_MY_TOPICS", "UNSBSCRIBE");
+
+        if(topics == null || topics.isEmpty()){
+            return;
+        }
+
+        String topic = chooseTopic("LIST_MY_TOPICS", topics, "UNSBSCRIBE");
+
+        if(topic == null){
+            return;
+        }
+
+        send(createMessage("UNSUBSCRIBE", topic, null));
+
+        System.out.println("Saiu do tópico: " + topic);
+    }
+
     private void handlePublish() {
-        List<String> topics = requestAndSelectTopic("LIST_MY_TOPICS", "PUBLISH");
-        if (topics == null) return;
+//        List<String> topics = requestAndSelectTopic("LIST_MY_TOPICS", "PUBLISH");;
+//        if (topics == null) return;
+//
+//        String topic = chooseTopic("LIST_MY_TOPICS", topics, "PUBLISH");
+//        if (topic == null) return;
+//
+//        System.out.println("[Topico]: " + topic);
+//        System.out.print("Digite uma mensagem: ");
+//        String payload = scanner.nextLine().trim();
+//
+//        send(createMessage("PUBLISH", topic, payload));
+          System.out.println("Virou na interface");
 
-        String topic = chooseTopic("LIST_MY_TOPICS", topics, "PUBLISH");
-        if (topic == null) return;
-
-        System.out.println("[Topico]: " + topic);
-        System.out.print("Digite uma mensagem: ");
-        String payload = scanner.nextLine().trim();
-
-        send(createMessage("PUBLISH", topic, payload));
     }
 
     private List<String> requestAndSelectTopic(String type, String action){
@@ -82,7 +108,15 @@ public class Tx implements Runnable{
         String topic = "";
 
         if (topics.isEmpty()) {
-            System.out.print("Nenhum topico disponivel. Crie um novo "+action+": ");
+            if (action.equalsIgnoreCase("UNSUBSCRIBE")) {
+                System.out.println("Você não possui tópicos inscritos.");
+                return null;
+            }
+
+            System.out.print(
+                    "Nenhum topico disponivel. Crie um novo "+action+": "
+            );
+
             topic = scanner.nextLine().trim();
 
             if (action.equalsIgnoreCase("PUBLISH")) {
@@ -129,6 +163,7 @@ public class Tx implements Runnable{
 
     private Message createMessage(String type, String topic, String payload) {
         Message msg = new Message();
+        msg.clientId = clientId;
         msg.type = type;
         msg.topic = topic;
         msg.payload = payload;

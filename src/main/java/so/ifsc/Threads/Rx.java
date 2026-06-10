@@ -11,13 +11,16 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import so.ifsc.View.Publish;
 
 public class Rx implements Runnable{
     private final BufferedReader leitor;
+    private final Client client;
 
-    public Rx(InputStream in) {
+    public Rx(InputStream in, Client client) {
 //        baseado em json, le linha a linha -> converte de bytes para txt
         this.leitor = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+        this.client = client;
     }
 
     @Override
@@ -31,26 +34,36 @@ public class Rx implements Runnable{
 
                 switch (msg.type.toUpperCase()) {
                     case "MESSAGE" -> {
-                        System.out.println("\n-------------------Mensagem Recebida!-------------------");
-                        System.out.println("Topico:      "+msg.topic);
-                        System.out.println("Data:       "+msg.date);
-                        System.out.println("Horario:       "+msg.time);
-                        System.out.println("Mensagem:    "+msg.payload);
-                        System.out.println("-------------------------------------------------------");
+                        if (client.getPublishView() != null) {
+                            client.getPublishView().addMessage(msg);
+                        }
                     }
                     case "TOPICS_LIST" -> {
-                        List<String> topics = new Gson().fromJson(msg.payload, new TypeToken<List<String>>() {
-                        }.getType());
+                        List<String> topics = new Gson().fromJson(msg.payload, new TypeToken<List<String>>() {}.getType());
 
                         Client.latestTopics = topics;
                         Client.topicsUpdated = true;
-
-                        System.out.print("[Topicos disponiveis: " + topics.toString() + "]\n");
-                        System.out.println("-1. 'Crie um novo tópico'");
-                        for (int i = 0; i < topics.size(); i++) {
-                            System.out.println(" "+i + ". " + topics.get(i));
+                        
+                        if (client.getPublishView() != null) {
+                            client.getPublishView().updateTopics(topics);
                         }
-                        System.out.print("\n>");
+
+                        // NOVO: Atualiza a tela de Subscribe se estiver aberta
+                        if (client.getSubscribeView() != null) {
+                            client.getSubscribeView().updateTopics(topics);
+                        }
+                        
+                        if (client.getUnsubscribeView() != null) {
+                            client.getUnsubscribeView().updateTopics(topics);
+                        }
+                    }
+                    case "MY_TOPICS_LIST" -> { // Mude para o nome exato do tipo que seu servidor retorna para "LIST_MY_TOPICS"
+                        List<String> myTopics = new Gson().fromJson(msg.payload, new TypeToken<List<String>>() {}.getType());
+
+                        // Se a tela de Unsubscribe estiver aberta, atualiza ela dinamicamente!
+                        if (client.getUnsubscribeView() != null) {
+                            client.getUnsubscribeView().updateTopics(myTopics);
+                        }
                     }
                     default -> System.out.println("Não reconhecido: " + msg.type);
                 }
