@@ -65,6 +65,25 @@ public class Rx implements Runnable{
                             client.getUnsubscribeView().updateTopics(myTopics);
                         }
                     }
+                    case "CHALLENGE" -> {
+                        try {
+                            // Carrega o certificado assinado e transforma em Hex
+                            String certificadoHex = client.carregarCertificadoParaEnvio();
+
+                            Message authResp = new Message();
+                            authResp.type = "AUTH_RESPONSE";
+                            authResp.clientId = client.getClientId();
+                            authResp.payload = certificadoHex; // Transmite o certificado assinado via JSON
+
+                            client.send(authResp);
+                        } catch (Exception e) {
+                            System.out.println("Erro ao ler credenciais assinadas: " + e.getMessage());
+                        }
+                    }
+                    case "AUTH_SUCCESS" -> {
+                        // Abre a tela de Menu e fecha a de Init (Login efetuado com sucesso!)
+                        System.out.println("Autenticado com sucesso pelo Broker!");
+                    }
                     default -> System.out.println("Não reconhecido: " + msg.type);
                 }
             }

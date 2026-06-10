@@ -3,6 +3,8 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package so.ifsc.View;
+import java.io.File;
+import javax.swing.JFileChooser;
 import so.ifsc.Client;
 
 /**
@@ -40,6 +42,9 @@ public class Init extends javax.swing.JFrame {
         jLabel4 = new javax.swing.JLabel();
         serverPort = new javax.swing.JTextField();
         clientId = new javax.swing.JTextField();
+        jTextField1 = new javax.swing.JTextField();
+        certificate = new javax.swing.JButton();
+        jLabel5 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -60,33 +65,49 @@ public class Init extends javax.swing.JFrame {
 
         clientId.addActionListener(this::clientIdActionPerformed);
 
+        jTextField1.setText("...");
+
+        certificate.setText("Certificado");
+        certificate.addActionListener(this::certificateActionPerformed);
+
+        jLabel5.setText("Escolher Certificado:");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(48, 48, 48)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(hostIP, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jLabel4))
-                            .addComponent(jLabel1)
-                            .addComponent(jLabel3))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel2)
-                                .addGap(0, 65, Short.MAX_VALUE))
-                            .addComponent(serverPort)))
-                    .addComponent(clientId))
-                .addGap(29, 29, 29))
             .addGroup(layout.createSequentialGroup()
                 .addGap(142, 142, 142)
                 .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(48, 48, 48)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel5)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jTextField1)
+                                .addGap(18, 18, 18)
+                                .addComponent(certificate))
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(hostIP, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jLabel4))
+                                    .addComponent(jLabel1)
+                                    .addComponent(jLabel3))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jLabel2)
+                                        .addGap(0, 65, Short.MAX_VALUE))
+                                    .addComponent(serverPort)))
+                            .addComponent(clientId, javax.swing.GroupLayout.Alignment.LEADING))
+                        .addGap(29, 29, 29))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -106,7 +127,13 @@ public class Init extends javax.swing.JFrame {
                         .addComponent(serverPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(clientId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(101, 101, 101)
+                .addGap(18, 18, 18)
+                .addComponent(jLabel5)
+                .addGap(9, 9, 9)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(certificate))
+                .addGap(35, 35, 35)
                 .addComponent(jButton1)
                 .addGap(45, 45, 45))
         );
@@ -118,64 +145,41 @@ public class Init extends javax.swing.JFrame {
         String clientName = clientId.getText().trim();
         String host = hostIP.getText().trim();
         String portText = serverPort.getText().trim();
+        String certPath = jTextField1.getText().trim();
 
-        if (clientName.isEmpty()) {
-            javax.swing.JOptionPane.showMessageDialog(
-                    this,
-                    "Informe o nome do usuário."
-            );
+        if (clientName.isEmpty() || host.isEmpty() || portText.isEmpty()) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Por favor, preencha todos os campos.");
             return;
         }
 
-        if (host.isEmpty()) {
+        // Ajuste da validação para refletir o nosso algoritmo de Hash manual
+        if (certPath.isEmpty() || certPath.equals("...")) {
             javax.swing.JOptionPane.showMessageDialog(
                     this,
-                    "Informe o IP do servidor."
+                    "É obrigatório selecionar seu arquivo de Identidade Criptográfica (.crt) para autenticação!"
             );
             return;
         }
 
         int port;
-
         try {
             port = Integer.parseInt(portText);
         } catch (NumberFormatException ex) {
-            javax.swing.JOptionPane.showMessageDialog(
-                    this,
-                    "Porta inválida."
-            );
+            javax.swing.JOptionPane.showMessageDialog(this, "Porta inválida.");
             return;
         }
 
         new Thread(() -> {
             try {
+                Client client = new Client(host, port, clientName, certPath);
+                client.connect(); // Agora conecta via Socket tradicional e dispara o CONNECT
 
-                Client client = new Client(
-                        host,
-                        port,
-                        clientName
-                );
-
-                client.connect();
+                // Abre a tela principal
                 Menu menu = new Menu(client);
                 menu.setVisible(true);
                 dispose();
 
-//                javax.swing.SwingUtilities.invokeLater(() -> {
-//
-//                    javax.swing.JOptionPane.showMessageDialog(
-//                            this,
-//                            "Conectado com sucesso!"
-//                    );
-//
-//                    // abrir próxima tela aqui
-//                    // new MainView(client).setVisible(true);
-//
-//                    dispose();
-//                });
-
             } catch (Exception ex) {
-
                 javax.swing.SwingUtilities.invokeLater(() ->
                         javax.swing.JOptionPane.showMessageDialog(
                                 this,
@@ -184,11 +188,28 @@ public class Init extends javax.swing.JFrame {
                 );
             }
         }).start();
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }
 
     private void clientIdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clientIdActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_clientIdActionPerformed
+
+    private void certificateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_certificateActionPerformed
+        JFileChooser flch = new JFileChooser();
+        flch.setDialogTitle("Selecione sua Chave de Identidade (.crt)");
+
+        // Mudamos o filtro para focar no .crt que geramos com o OpenSSL no Linux
+        javax.swing.filechooser.FileNameExtensionFilter filter =
+                new javax.swing.filechooser.FileNameExtensionFilter("Certificados Criptográficos (*.crt)", "crt");
+        flch.setFileFilter(filter);
+
+        int result = flch.showOpenDialog(this);
+
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File fl = flch.getSelectedFile();
+            jTextField1.setText(fl.getAbsolutePath());
+        }
+    }
 
     /**
      * @param args the command line arguments
@@ -227,6 +248,7 @@ public class Init extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton certificate;
     private javax.swing.JTextField clientId;
     private javax.swing.JTextField hostIP;
     private javax.swing.JButton jButton1;
@@ -234,6 +256,8 @@ public class Init extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField serverPort;
     // End of variables declaration//GEN-END:variables
 }
